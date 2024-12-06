@@ -1,0 +1,340 @@
+import { useState, useEffect } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+
+import React, { useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Html, OrbitControls } from '@react-three/drei';
+import { gsap } from 'gsap';
+// Sub-components
+//function ConsumerSphere() {
+//  return (
+//    <mesh position={[0, 0, 0]}>
+//      <sphereGeometry args={[0.5, 32, 32]} />
+//      <meshStandardMaterial color="#ffffff" /> {/* Neutral color */}
+//    </mesh>
+//  );
+//}
+//
+//function BrandObject({ position, color }) {
+//  return (
+//    <mesh position={position}>
+//      <boxGeometry args={[0.3, 0.3, 0.3]} />
+//      <meshStandardMaterial color={color} />
+//    </mesh>
+//  );
+//}
+//
+//function BrandRing() {
+//  // We’ll place N brands around a circle
+//  const N = 8;
+//  const radius = 3;
+//  const brands = Array.from({ length: N }, (_, i) => {
+//    const angle = (i / N) * 2 * Math.PI;
+//    const x = radius * Math.cos(angle);
+//    const z = radius * Math.sin(angle);
+//    return { position: [x, 0, z], color: "#a2d2ff" }; // Soft blue for now
+//  });
+//
+//  return (
+//    <>
+//      {brands.map((b, i) => (
+//        <BrandObject key={i} position={b.position} color={b.color} />
+//      ))}
+//    </>
+//  );
+//}
+//
+//function Lights() {
+//  return (
+//    <>
+//      <ambientLight intensity={0.5} />
+//      <directionalLight position={[5, 10, 5]} intensity={1} />
+//    </>
+//  );
+//}
+//function FacadeScene() { 
+//  return (
+//    <mesh position={[0,0,0]}>
+//      {/* Placeholder: building facade geometry */}
+//      <boxGeometry args={[2,3,0.1]} />
+//      <meshStandardMaterial color="gray" />
+//    </mesh>
+//  );
+//}
+//
+//function TransitionOverlay({ opacity }) {
+//  // A full-screen quad to fade in/out
+//  // Use a plane covering the entire camera frustum or <Html> overlay with CSS
+//  return (
+//    <mesh position={[0,0,-1]} scale={[100,100,1]}>
+//      <planeGeometry args={[1,1]} />
+//      <meshBasicMaterial color="black" transparent opacity={opacity} />
+//    </mesh>
+//  );
+//}
+//function SceneManager({ phase }) {
+//  return (
+//    <>
+//      <Lights />
+//      {phase === "brandScene" && (
+//        <>
+//          <ConsumerSphere />
+//          <BrandRing />
+//        </>
+//      )}
+//      {phase === "facadeScene" && <FacadeScene />}
+//    </>
+//  );
+//}
+//
+//function MainScene() {
+//  const { camera } = useThree();
+//  const [phase, setPhase] = useState("brandScene");
+//  const [overlayOpacity, setOverlayOpacity] = useState(0);
+//
+//  const handleNext = () => {
+//    // Assume we know the brand position we want to zoom into, say brand at [3,0,0]
+//    const targetPos = { x: 3, y: 0, z: 0.5 };
+//
+//    // Step 1: Animate camera toward brand
+//    gsap.to(camera.position, {
+//      duration: 2,
+//      x: targetPos.x,
+//      y: targetPos.y,
+//      z: targetPos.z,
+//      onUpdate: () => camera.lookAt(0,0,0),
+//      onComplete: () => {
+//        // Camera is now close to brand
+//        // Fade in overlay
+//        gsap.to({}, { 
+//          duration: 1,
+//          onStart: () => {
+//            gsap.to(overlayOpacityRef, { current: 1, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
+//          },
+//          onComplete: () => {
+//            // Switch phase
+//            setPhase("facadeScene");
+//            // Fade out overlay
+//            gsap.to(overlayOpacityRef, { current: 0, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
+//          }
+//        });
+//      }
+//    });
+//
+//    // Alternatively, trigger the fade earlier (e.g., halfway):
+//    // You could implement a timed delay or a distance check inside onUpdate.
+//  }
+//
+//  // We'll need a mutable ref to handle overlay opacity through gsap easily
+//  const overlayOpacityRef = useRef(overlayOpacity);
+//
+//  useEffect(() => {
+//    overlayOpacityRef.current = overlayOpacity;
+//  }, [overlayOpacity]);
+//
+//  return (
+//    <>
+//      <Html position={[0, 1, 0]} style={{ pointerEvents: 'auto' }}>
+//        <button onClick={handleNext}>Next</button>
+//      </Html>
+//      <SceneManager phase={phase} />
+//      <TransitionOverlay opacity={overlayOpacity} />
+//    </>
+//  );
+//}
+//
+//export function SectionInfluenceAppeal() {
+//  return (
+//    <div style={{ width: '100%', height: '600px', position:'relative' }}>
+//      <Canvas>
+//        <OrbitControls />
+//        <MainScene />
+//      </Canvas>
+//    </div>
+//  );
+//}
+//
+//
+//function App() {
+//  const [count, setCount] = useState(0)
+//
+//  return (
+//    <>
+//      <div>
+//        <a href="https://vite.dev" target="_blank">
+//          <img src={viteLogo} className="logo" alt="Vite logo" />
+//        </a>
+//        <a href="https://react.dev" target="_blank">
+//          <img src={reactLogo} className="logo react" alt="React logo" />
+//        </a>
+//      </div>
+//      <h1>Vite + React</h1>
+//      <div className="card">
+//        <button onClick={() => setCount((count) => count + 1)}>
+//          count is {count}
+//        </button>
+//        <p>
+//          Edit <code>src/App.jsx</code> and save to test HMR
+//        </p>
+//      </div>
+//      <p className="read-the-docs">
+//        Click on the Vite and React logos to learn more
+//      </p>
+//      <SectionInfluenceAppeal />
+//    </>
+//  )
+//}
+//
+//export default App
+
+
+
+
+// Consumer sphere + brand ring scene (Scene 1)
+function ConsumerAndBrands() {
+  return (
+    <group>
+      {/* Consumer in center */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.5, 32, 32]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      {/* Brand ring around the consumer */}
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const x = Math.cos(angle) * 3;
+        const z = Math.sin(angle) * 3;
+        return (
+          <mesh key={i} position={[x, 0, z]}>
+            <boxGeometry args={[0.3, 0.3, 0.3]} />
+            <meshStandardMaterial color="#87ceeb" />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Facade scene (Scene 2)
+function FacadeScene() {
+  return (
+    <group>
+      {/* A simple facade - a flat box representing the front of a building */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2, 3, 0.1]} />
+        <meshStandardMaterial color="#aaa" />
+      </mesh>
+      {/* Some "hidden" items behind the facade to represent greenwashing/manipulation */}
+      <mesh position={[0, 0, -1]}>
+        <boxGeometry args={[0.5,0.5,0.5]} />
+        <meshStandardMaterial color="green" />
+      </mesh>
+      <mesh position={[0.7, 0, -1]}>
+        <boxGeometry args={[0.5,0.5,0.5]} />
+        <meshStandardMaterial color="brown" />
+      </mesh>
+    </group>
+  );
+}
+
+// Main 3D Scene wrapper
+function Scene({ activeSection }) {
+  const { camera } = useThree();
+  const prevSection = useRef(activeSection);
+
+  // On section changes, animate the camera and possibly change what's visible
+  useEffect(() => {
+    if (activeSection === 1) {
+      // Scene 1: Marketplace - show consumer + brands
+      gsap.to(camera.position, { x: 0, y: 5, z: 10, duration: 1, onUpdate: () => camera.lookAt(0,0,0) });
+    } else if (activeSection === 2) {
+      // Move camera closer to highlight brand objects
+      gsap.to(camera.position, { x: 0, y: 2, z: 5, duration:1, onUpdate:() => camera.lookAt(0,0,0) });
+    } else if (activeSection === 3) {
+      // Transition to facade scene: move camera closer and slightly to the side
+      gsap.to(camera.position, { x: 0, y: 1.5, z: 3, duration:1, onUpdate:() => camera.lookAt(0,0,0) });
+    }
+
+    prevSection.current = activeSection;
+  }, [activeSection, camera]);
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 10]} intensity={1} />
+      {activeSection < 3 && <ConsumerAndBrands />}
+      {activeSection === 3 && <FacadeScene />}
+    </>
+  );
+}
+
+// Main App
+export default function App() {
+  const [activeSection, setActiveSection] = useState(1);
+
+  // Update activeSection based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const sectionHeight = window.innerHeight;
+      const currentSection = Math.floor(scrollPosition / sectionHeight) + 1;
+      // Ensure currentSection doesn't exceed number of sections we have
+      const maxSections = 3; 
+      setActiveSection(Math.min(currentSection, maxSections));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div style={{ margin:0, padding:0, height:'300vh', overflowY:'scroll', fontFamily:'Arial, sans-serif' }}>
+      {/* Text Content */}
+      <div 
+        id="content" 
+        style={{ position:'absolute', top:0, width:'100%', zIndex:10 }}
+      >
+        <section 
+          className="text-section" 
+          style={{ height:'100vh', padding:'20px', boxSizing:'border-box', scrollSnapAlign:'start' }}
+        >
+          <h1>The Marketplace of Identity</h1>
+          <p>
+            Brands have evolved beyond selling products. They now offer identities, tapping into our deep-seated need for belonging and self-expression. Companies like Patagonia and Levi’s align their products with environmental values, allowing consumers to feel their purchases reflect a commitment to sustainability.
+          </p>
+        </section>
+        <section 
+          className="text-section" 
+          style={{ height:'100vh', padding:'20px', boxSizing:'border-box', scrollSnapAlign:'start' }}
+        >
+          <h1>Connection and Belonging</h1>
+          <p>
+            This approach fosters loyalty and pride. But what happens when brands realize they can simply market these values instead of truly embodying them? The closer we examine these relationships, the more we must ask: Are these values genuine or are they a carefully crafted facade?
+          </p>
+        </section>
+        <section 
+          className="text-section" 
+          style={{ height:'100vh', padding:'20px', boxSizing:'border-box', scrollSnapAlign:'start' }}
+        >
+          <h1>Marketing Over Reality</h1>
+          <p>
+            As companies increasingly rely on image over product quality, we must look behind the facade. Greenwashing and manipulative tactics lurk behind polished exteriors, and the only way forward is critical thinking. Are we supporting authentic actions or cleverly packaged promises?
+          </p>
+        </section>
+      </div>
+
+      {/* 3D Canvas in Background */}
+      <div 
+        id="canvas-container" 
+        style={{ position:'fixed', top:0, left:0, width:'100%', height:'100%', zIndex:1 }}
+      >
+        <Canvas>
+          <OrbitControls enableZoom={false} enablePan={false} />
+          <Scene activeSection={activeSection} />
+        </Canvas>
+      </div>
+    </div>
+  );
+}

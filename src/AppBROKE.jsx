@@ -1,0 +1,422 @@
+import { useState, useEffect } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Html, OrbitControls } from '@react-three/drei';
+import { gsap } from 'gsap';
+
+import ScrollTrigger from 'gsap/ScrollTrigger';
+
+import { createContext } from 'react';
+
+export const AnimationContext = createContext();
+
+export const AnimationProvider = ({ children }) => {
+  const [currentAnimation, setCurrentAnimation] = useState(null);
+
+  return (
+    <AnimationContext.Provider value={{ currentAnimation, setCurrentAnimation }}>
+      {children}
+    </AnimationContext.Provider>
+  );
+};
+// Register ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
+const rawContextt = {
+  "The Marketplace of Identity": [
+    "Brands have evolved beyond selling products.",
+    "They now offer identities, tapping into our deep-seated need for belonging and self-expression.",
+    "Companies like Patagonia and Levi’s align their products with environmental values, allowing consumers to feel their purchases reflect a commitment to sustainability."
+  ],
+  "Connection and Belonging": [
+    "This approach fosters loyalty and pride.",
+    "But what happens when brands realize they can simply market these values instead of truly embodying them?",
+    "We must ask: Are these values genuine or are they a carefully crafted facade?"
+  ]
+};
+
+const rawContext = {
+  "The Marketplace of Identity": [
+    {
+      text: "Brands have evolved beyond selling products.",
+      animationId: "animateConsumerGrowth"
+    },
+    {
+      text: "They now offer identities, tapping into our deep-seated need for belonging and self-expression.",
+      animationId: "highlightBelonging"
+    },
+    {
+      text: "Companies like Patagonia and Levi’s align their products with environmental values, allowing consumers to feel their purchases reflect a commitment to sustainability.",
+      animationId: "highlightPatagonia"
+    }
+  ],
+  "Connection and Belonging": [
+    {
+      text: "This approach fosters loyalty and pride.",
+      animationId: "fosterLoyalty"
+    },
+    {
+      text: "But what happens when brands realize they can simply market these values instead of truly embodying them?",
+      animationId: "realizeMarketingShift"
+    },
+    {
+      text: "We must ask: Are these values genuine or are they a carefully crafted facade?",
+      animationId: "questionGenuineness"
+    }
+  ]
+  // Add more sections as needed
+};
+
+// A simple 3D scene placeholder
+import React, { useContext, useRef, } from 'react';
+
+function Scene() {
+  const { currentAnimation } = useContext(AnimationContext);
+  const consumerRef = useRef();
+  const brandRefs = useRef([]);
+
+  // Initialize brandRefs as an array of refs for each brand
+  if (brandRefs.current.length !== 8) {
+    brandRefs.current = Array(8).fill().map((_, i) => brandRefs.current[i] || React.createRef());
+  }
+
+  useEffect(() => {
+    if (!currentAnimation) return;
+
+    // Define animation functions for each animationId
+    const animateConsumerGrowth = () => {
+      if (consumerRef.current) {
+        gsap.to(consumerRef.current.scale, {
+          x: 1.5,
+          y: 1.5,
+          z: 1.5,
+          duration: 1,
+          yoyo: true,
+          repeat: 1
+        });
+      }
+    };
+
+    const highlightBelonging = () => {
+      const brandIndex = 0; // Assuming first brand corresponds to 'belonging'
+      const brandMesh = brandRefs.current[brandIndex].current;
+      if (brandMesh) {
+        gsap.to(brandMesh.material.color, { r: 1, g: 0, b: 0, duration: 0.5, repeat: 1, yoyo: true });
+      }
+    };
+
+    const highlightPatagonia = () => {
+      const brandIndex = 1; // Assuming second brand corresponds to 'Patagonia'
+      const brandMesh = brandRefs.current[brandIndex].current;
+      if (brandMesh) {
+        gsap.to(brandMesh.scale, { x: 2, y: 2, z: 2, duration: 0.5, yoyo: true, repeat: 1 });
+      }
+    };
+
+    const fosterLoyalty = () => {
+      const brandIndex = 2; // Example for 'fosterLoyalty'
+      const brandMesh = brandRefs.current[brandIndex].current;
+      if (brandMesh) {
+        gsap.to(brandMesh.rotation, { y: brandMesh.rotation.y + Math.PI * 2, duration: 1, repeat: 1, yoyo: false });
+      }
+    };
+
+    const realizeMarketingShift = () => {
+      if (consumerRef.current) {
+        gsap.to(consumerRef.current.material.color, { r: 0.8, g: 0.8, b: 0.8, duration: 0.5, yoyo: true, repeat: 1 });
+      }
+    };
+
+    const questionGenuineness = () => {
+      gsap.to(consumerRef.current.position, { y: 1, duration: 1, yoyo: true, repeat: 1 });
+    };
+
+    // Map animationIds to their corresponding functions
+    const animationMap = {
+      "animateConsumerGrowth": animateConsumerGrowth,
+      "highlightBelonging": highlightBelonging,
+      "highlightPatagonia": highlightPatagonia,
+      "fosterLoyalty": fosterLoyalty,
+      "realizeMarketingShift": realizeMarketingShift,
+      "questionGenuineness": questionGenuineness
+      // Add more mappings as needed
+    };
+
+    const animationFunc = animationMap[currentAnimation];
+    if (animationFunc) {
+      animationFunc();
+    }
+
+  }, [currentAnimation]);
+
+  return (
+    <>
+      {/* Ambient and Directional Lights */}
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 5, 5]} intensity={1} />
+
+      {/* Consumer Sphere */}
+      <mesh ref={consumerRef} position={[0, 0, 0]}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+
+      {/* Brand Rings */}
+      {Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const x = Math.cos(angle) * 3;
+        const z = Math.sin(angle) * 3;
+        return (
+          <mesh
+            key={i}
+            ref={brandRefs.current[i]}
+            position={[x, 0, z]}
+          >
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshStandardMaterial color="#87ceeb" />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
+function ConsumerSphere() {
+  return (
+    <mesh position={[0, 0, 0]}>
+      <sphereGeometry args={[0.5, 32, 32]} />
+      <meshStandardMaterial color="#ffffff" /> {/* Neutral color */}
+    </mesh>
+  );
+}
+
+function BrandObject({ position, color }) {
+  return (
+    <mesh position={position}>
+      <boxGeometry args={[0.3, 0.3, 0.3]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+}
+
+function BrandRing() {
+  // We’ll place N brands around a circle
+  const N = 8;
+  const radius = 3;
+  const brands = Array.from({ length: N }, (_, i) => {
+    const angle = (i / N) * 2 * Math.PI;
+    const x = radius * Math.cos(angle);
+    const z = radius * Math.sin(angle);
+    return { position: [x, 0, z], color: "#a2d2ff" }; // Soft blue for now
+  });
+
+  return (
+    <>
+      {brands.map((b, i) => (
+        <BrandObject key={i} position={b.position} color={b.color} />
+      ))}
+    </>
+  );
+}
+
+function Lights() {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 10, 5]} intensity={1} />
+    </>
+  );
+}
+
+function TransitionOverlay({ opacity }) {
+  // A full-screen quad to fade in/out
+  // Use a plane covering the entire camera frustum or <Html> overlay with CSS
+  return (
+    <mesh position={[0,0,-1]} scale={[100,100,1]}>
+      <planeGeometry args={[1,1]} />
+      <meshBasicMaterial color="black" transparent opacity={opacity} />
+    </mesh>
+  );
+}
+function SceneManager({ phase }) {
+  return (
+    <>
+      <Lights />
+      {phase === "brandScene" && (
+        <>
+          <ConsumerSphere />
+          <BrandRing />
+        </>
+      )}
+      {phase === "facadeScene" && <FacadeScene />}
+    </>
+  );
+}
+
+function MainScene() {
+  const { camera } = useThree();
+  const [phase, setPhase] = useState("brandScene");
+  const [overlayOpacity, setOverlayOpacity] = useState(0);
+
+  const handleNext = () => {
+    // Assume we know the brand position we want to zoom into, say brand at [3,0,0]
+    const targetPos = { x: 3, y: 0, z: 0.5 };
+
+    // Step 1: Animate camera toward brand
+    gsap.to(camera.position, {
+      duration: 2,
+      x: targetPos.x,
+      y: targetPos.y,
+      z: targetPos.z,
+      onUpdate: () => camera.lookAt(0,0,0),
+      onComplete: () => {
+        // Camera is now close to brand
+        // Fade in overlay
+        gsap.to({}, { 
+          duration: 1,
+          onStart: () => {
+            gsap.to(overlayOpacityRef, { current: 1, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
+          },
+          onComplete: () => {
+            // Switch phase
+            setPhase("facadeScene");
+            // Fade out overlay
+            gsap.to(overlayOpacityRef, { current: 0, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
+          }
+        });
+      }
+    });
+
+    // Alternatively, trigger the fade earlier (e.g., halfway):
+    // You could implement a timed delay or a distance check inside onUpdate.
+  }
+
+  // We'll need a mutable ref to handle overlay opacity through gsap easily
+  const overlayOpacityRef = useRef(overlayOpacity);
+
+  useEffect(() => {
+    overlayOpacityRef.current = overlayOpacity;
+  }, [overlayOpacity]);
+
+  return (
+    <>
+      <Html position={[0, 1, 0]} style={{ pointerEvents: 'auto' }}>
+        <button onClick={handleNext}>Next</button>
+      </Html>
+      <SceneManager phase={phase} />
+      <TransitionOverlay opacity={overlayOpacity} />
+    </>
+  );
+}
+
+
+function Section({ title, sentences }) {
+const { setCurrentAnimation } = useContext(AnimationContext);
+  const sectionRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  useEffect(() => {
+    const sectionEl = sectionRef.current;
+    const sentenceEls = sectionEl.querySelectorAll('.sentence');
+
+    // Height: we want enough scroll space for each sentence + some extra
+    // For N sentences, let's create a scrollable area ~ (N+1)*100vh
+    const totalSentences = sentences.length;
+    const pinDuration = (totalSentences + 1) * window.innerHeight;
+
+    // Set up ScrollTrigger for this section
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionEl,
+        start: "top top",
+        end: `+=${pinDuration}`,
+        pin: true,
+        scrub: true
+      }
+    });
+
+    // For each sentence, fade it in at different increments of the timeline
+    sentenceEls.forEach((sentence, i) => {
+      tl.fromTo(sentence.text, {opacity:0, y:50}, {opacity:1, y:0, duration:0.5}, i);
+      // Each sentence fades in at a different scroll position
+      tl.call(() => {
+        setCurrentAnimation(sentence?.animationId);
+      }, null, i * 0.5 + 0.5);
+    });
+
+
+    return () => {
+      tl.kill();
+      ScrollTrigger.getAll().forEach(st => st.kill());
+    };
+  }, [sentences]);
+
+  return (
+    <div ref={sectionRef} className="section-container">
+      <h2 className="section-title">{title}</h2>
+      <div className="sentences-wrapper">
+        {sentences.map((sentence, i) => (
+          <p className="sentence" key={i} data-animation-id={sentence.animationId}>{sentence.text}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+function calculateSectionHeights(rawContext) {
+  const sectionHeights = {};
+  let cumulativeHeight = 0;
+
+  Object.entries(rawContext).forEach(([title, sentences]) => {
+    const sectionHeight = (sentences.length + 1) * window.innerHeight; // Each sentence gets 1 viewport height
+    sectionHeights[title] = {
+      height: sectionHeight,
+      start: cumulativeHeight,
+    };
+    cumulativeHeight += sectionHeight;
+  });
+
+  return { sectionHeights, totalHeight: cumulativeHeight };
+}
+export default function App() {
+  const { sectionHeights, totalHeight } = calculateSectionHeights(rawContext);
+  // Convert rawContext to an array of sections for easier rendering
+  // sections = [ [title, [sentences...]], [title, [sentences...]] ]
+
+  return (
+    <AnimationProvider >
+    <div style={{margin:0, padding:0, height: `${totalHeight*2}px`}}>
+      {/* Text Sections */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 10 }}>
+        {Object.entries(rawContext).map(([title, sentences], idx) => (
+          <div
+            key={idx}
+            className="section-container"
+            style={{
+              position: 'absolute',
+              top: `${sectionHeights[title].start}px`, // Start position dynamically calculated
+              height: `${sectionHeights[title].height}px`, // Total height for the section
+            }}
+          >
+            <Section title={title} sentences={sentences} />
+
+          </div>
+        ))}
+      </div>
+
+      {/* 3D Background */}
+      <div style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', zIndex:1}}>
+        <Canvas>
+          <OrbitControls enableZoom={false} enablePan={false} />
+          <Scene />
+        </Canvas>
+      </div>
+    </div>
+    </AnimationProvider>
+  );
+}

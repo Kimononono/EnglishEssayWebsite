@@ -1,0 +1,131 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.section-container {
+  position: relative;
+  width: 100%;
+  /* The total height is handled by ScrollTrigger pin duration */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background: can be a neutral color if needed */
+}
+
+.section-title {
+  font-size: 2em;
+  margin-bottom: 2em;
+  z-index: 1;
+  position: relative;
+}
+
+.sentences-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sentence {
+  font-size: 1.5em;
+  max-width: 800px;
+  text-align: center;
+  margin: 20px 0;
+  opacity: 0; /* initially hidden, revealed by gsap */
+}
+
+
+body, html, #root, .App {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Canvas is in the background */
+}
+
+.text-container {
+  position: relative;
+  z-index: 10; /* Text is above the canvas */
+}
+
+.section-container {
+  width: 100%;
+  /* min-height is handled by Section.css */
+}
+
+.section-title {
+  font-size: 2em;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+.sentences-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sentence {
+  font-size: 1.5em;
+  max-width: 800px;
+  text-align: center;
+  margin: 20px 0;
+  opacity: 0; /* Initially hidden */
+}
