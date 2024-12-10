@@ -44,7 +44,7 @@ const ReflectionPage = () => {
 
             {/* PDF Viewer */}
             <div style={{ height: '90%', marginTop: '40px' }}>
-                <Viewer fileUrl="/EnglishEssayWebsite/public/document.pdf" plugins={[defaultLayout]} />
+                <Viewer fileUrl="/EnglishEssayWebsite/document.pdf" plugins={[defaultLayout]} />
             </div>
         </div>
     );
