@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; URL=/" />
+    <script type="text/javascript">
+      // Redirect to the React app while preserving the path
+      (function () {
+        var redirectTo = window.location.pathname;
+        window.location.href = "/" + "#" + redirectTo;
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>
