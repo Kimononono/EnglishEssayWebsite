@@ -103,12 +103,12 @@ function Scene() {
     </>
   );
 }
-
+import { useNavigate } from 'react-router-dom';
 export default function App() {
   const [tl, setTl] = useState();
   const [tl2, setT2] = useState();
   const refs = useRef([]);
-
+const navigate = useNavigate();
     useEffect(() => {
     // Ensure refs.current is a proper array
     if (!refs.current.length) {
@@ -128,6 +128,23 @@ export default function App() {
   });
   return (
       <>
+            <button
+                onClick={() => navigate('reflection/')}
+                style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    zIndex: 1000,
+                    padding: '10px 20px',
+                    backgroundColor: '#007BFF',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                }}
+            >
+                Reflection
+            </button>
     <div
 
         id="section-start"
