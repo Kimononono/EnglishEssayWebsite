@@ -93,6 +93,16 @@ useGSAP(() => {
       markers: false, // Debugging markers
     },
   });
+
+  const t4 = gsap.timeline({
+    scrollTrigger: {
+      trigger: '#idName-4',
+      start: 'top top',
+      end: '',
+      scrub: true,
+      markers: false, // Debugging markers
+    },
+  });
   // Animate the opacity of masks to fade out
   maskRefs.current.forEach((mask) => {
       console.log(mask)
@@ -128,7 +138,8 @@ useGSAP(() => {
 
 
   // Animate the opacity of spheres to fade out
-  spheresRef.current.forEach((sphere) => {
+  spheresRef.current.forEach((sphere, index) => {
+      if(index ==2 ) return
 
       console.log(sphere)
     if (sphere.material) {
@@ -142,6 +153,25 @@ useGSAP(() => {
       );
     }
   });
+
+  // Animate the opacity of spheres to fade out
+  spheresRef.current.forEach((sphere) => {
+
+      console.log(sphere)
+    if (sphere.material) {
+        console.log("JKFL")
+      t4.to(
+        sphere.material, // Ensure GSAP targets the material's opacity
+        {
+          opacity: .5,
+          ease: 'rough',
+        },
+        0 // Start at the same time (relative to timeline start)
+      );
+    }
+  });
+
+
 
   // Add a callback when the animation completes
   tl.call(onTransitionComplete);
@@ -454,6 +484,7 @@ export default function RotatingArcSection({ timeline, index }) {
   const calculateRadius = () => 3; // Fixed radius for now
 
 
+  const zInd = index == 5 ? 999 : 1;
   return (
     <div
       ref={containerRef}
@@ -463,7 +494,8 @@ export default function RotatingArcSection({ timeline, index }) {
         left: 0,
         width: '100%',
         height: '100%',
-        zIndex: 1,
+        zIndex: zInd,
+        pointerEvents: "all"
       }}
     >
       <Canvas

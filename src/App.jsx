@@ -181,7 +181,7 @@ export default function App() {
 
 
 
-<div className="container">
+<div className="container" style={{marginBottom: "100vh", overflowY: "hidden"}}>
   {Object.keys(rawContext).map((key, index) => {
     let idName = `idName-${index}`;
     if (index === 0) {
@@ -208,5 +208,6 @@ export default function App() {
 
         <RotatingRingSection timeline={tl2} index={0} />
       </>
+
   );
 }

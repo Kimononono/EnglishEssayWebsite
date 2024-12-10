@@ -108,6 +108,7 @@ function Section({ title, sentences, masterTimeline, index, idName }) {
     zIndex: (index + 1) * 10,
     padding: "20px", // General padding for the container
     borderRadius: "8px", // Optional, for rounded corners
+      pointerEvents: "auto",
   }}
 >
   <h2 className="section-title" style={{ marginBottom: "16px" }}>
