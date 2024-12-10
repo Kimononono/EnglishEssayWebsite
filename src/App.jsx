@@ -1,271 +1,212 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
-import React, { useRef } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Html, OrbitControls } from '@react-three/drei';
 import { gsap } from 'gsap';
+//import "./test.css";
+import { MainScene } from './scene';
+import { Ring } from './scene/ringitems';
+import * as THREE from 'three';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import RotatingRingSection from './ringSection';
+import { DeeplScene } from './deepl';
+import { useGSAP } from '@gsap/react';
+import Section from './section';
+import rawContext from './context';
 
-import ScrollTrigger from 'gsap/ScrollTrigger';
-
-// Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
-
-const rawContext = {
-  "The Marketplace of Identity": [
-    "Brands have evolved beyond selling products.",
-    "They now offer identities, tapping into our deep-seated need for belonging and self-expression.",
-    "Companies like Patagonia and Levi’s align their products with environmental values, allowing consumers to feel their purchases reflect a commitment to sustainability."
-  ],
-  "Connection and Belonging": [
-    "This approach fosters loyalty and pride.",
-    "But what happens when brands realize they can simply market these values instead of truly embodying them?",
-    "We must ask: Are these values genuine or are they a carefully crafted facade?"
-  ]
-};
-
-// A simple 3D scene placeholder
-function Scene() {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5,5,5]} />
-      <mesh position={[0,0,0]}>
-        <sphereGeometry args={[1,32,32]} />
-        <meshStandardMaterial color="white" />
-      </mesh>
-    </>
-  );
-}
-
-function ConsumerSphere() {
-  return (
-    <mesh position={[0, 0, 0]}>
-      <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color="#ffffff" /> {/* Neutral color */}
-    </mesh>
-  );
-}
-
-function BrandObject({ position, color }) {
-  return (
-    <mesh position={position}>
-      <boxGeometry args={[0.3, 0.3, 0.3]} />
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-}
-
-function BrandRing() {
-  // We’ll place N brands around a circle
-  const N = 8;
-  const radius = 3;
-  const brands = Array.from({ length: N }, (_, i) => {
-    const angle = (i / N) * 2 * Math.PI;
-    const x = radius * Math.cos(angle);
-    const z = radius * Math.sin(angle);
-    return { position: [x, 0, z], color: "#a2d2ff" }; // Soft blue for now
-  });
-
-  return (
-    <>
-      {brands.map((b, i) => (
-        <BrandObject key={i} position={b.position} color={b.color} />
-      ))}
-    </>
-  );
-}
-
-function Lights() {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 10, 5]} intensity={1} />
-    </>
-  );
-}
-
-function TransitionOverlay({ opacity }) {
-  // A full-screen quad to fade in/out
-  // Use a plane covering the entire camera frustum or <Html> overlay with CSS
-  return (
-    <mesh position={[0,0,-1]} scale={[100,100,1]}>
-      <planeGeometry args={[1,1]} />
-      <meshBasicMaterial color="black" transparent opacity={opacity} />
-    </mesh>
-  );
-}
-function SceneManager({ phase }) {
-  return (
-    <>
-      <Lights />
-      {phase === "brandScene" && (
-        <>
-          <ConsumerSphere />
-          <BrandRing />
-        </>
-      )}
-      {phase === "facadeScene" && <FacadeScene />}
-    </>
-  );
-}
-
-function MainScene() {
+gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(THREE)
+// Custom hook for camera animation
+export function useCameraAnimator(keyframes) {
   const { camera } = useThree();
-  const [phase, setPhase] = useState("brandScene");
-  const [overlayOpacity, setOverlayOpacity] = useState(0);
 
-  const handleNext = () => {
-    // Assume we know the brand position we want to zoom into, say brand at [3,0,0]
-    const targetPos = { x: 3, y: 0, z: 0.5 };
 
-    // Step 1: Animate camera toward brand
+  const moveToKeyframe = (index, duration = 1, easing = 'power2.inOut') => {
+    const { position, rotation } = keyframes[index];
+
     gsap.to(camera.position, {
-      duration: 2,
-      x: targetPos.x,
-      y: targetPos.y,
-      z: targetPos.z,
-      onUpdate: () => camera.lookAt(0,0,0),
-      onComplete: () => {
-        // Camera is now close to brand
-        // Fade in overlay
-        gsap.to({}, { 
-          duration: 1,
-          onStart: () => {
-            gsap.to(overlayOpacityRef, { current: 1, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
-          },
-          onComplete: () => {
-            // Switch phase
-            setPhase("facadeScene");
-            // Fade out overlay
-            gsap.to(overlayOpacityRef, { current: 0, duration: 0.5, onUpdate: () => setOverlayOpacity(overlayOpacityRef.current) });
-          }
-        });
-      }
+      x: position[0],
+      y: position[1],
+      z: position[2],
+      duration,
+      ease: easing,
+    }).to(camera.rotation, {
+      x: rotation[0],
+      y: rotation[1],
+      z: rotation[2],
+      duration,
+      ease: easing,
     });
+  };
 
-    // Alternatively, trigger the fade earlier (e.g., halfway):
-    // You could implement a timed delay or a distance check inside onUpdate.
-  }
+  return { moveToKeyframe };
+}
 
-  // We'll need a mutable ref to handle overlay opacity through gsap easily
-  const overlayOpacityRef = useRef(overlayOpacity);
+// Keyframes for the camera animation
+const cameraKeyframes = [
+  { position: [0, 1, 5], rotation: [0, 0, 0] },
+  { position: [5, 1, 0], rotation: [0, Math.PI / 2, 0] },
+  { position: [0, 5, 0], rotation: [-Math.PI / 2, 0, 0] },
+];
 
+function Scene() {
+  const { moveToKeyframe } = useCameraAnimator(cameraKeyframes);
+  const scrollRef = useRef(0); // Track the current scroll index
+
+    useEffect(() => {
+    const handleResize = () => {
+        ScrollTrigger.refresh();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+    }, []);
   useEffect(() => {
-    overlayOpacityRef.current = overlayOpacity;
-  }, [overlayOpacity]);
+    const handleScroll = (event) => {
+      const delta = event.deltaY > 0 ? 1 : -1; // Scroll direction
+      let newIndex = scrollRef.current + delta;
+
+      // Clamp index within keyframes range
+      newIndex = Math.max(0, Math.min(newIndex, cameraKeyframes.length - 1));
+
+      if (newIndex !== scrollRef.current) {
+        scrollRef.current = newIndex;
+        moveToKeyframe(newIndex);
+      }
+    };
+
+    window.addEventListener('wheel', handleScroll);
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [moveToKeyframe]);
 
   return (
     <>
-      <Html position={[0, 1, 0]} style={{ pointerEvents: 'auto' }}>
-        <button onClick={handleNext}>Next</button>
+      <ambientLight />
+      <OrbitControls />
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+
+      {/* Buttons to trigger keyframes */}
+      <Html>
+        <div style={{ position: 'absolute', top: 20, left: 20 }}>
+          {cameraKeyframes.map((_, index) => (
+            <button key={index} onClick={() => moveToKeyframe(index)}>
+              Go to Keyframe {index + 1}
+            </button>
+          ))}
+        </div>
       </Html>
-      <SceneManager phase={phase} />
-      <TransitionOverlay opacity={overlayOpacity} />
     </>
   );
 }
 
+export default function App() {
+  const [tl, setTl] = useState();
+  const [tl2, setT2] = useState();
+  const refs = useRef([]);
 
-function Section({ title, sentences }) {
-  const sectionRef = useRef(null);
-  const triggerRef = useRef(null);
-
-  useEffect(() => {
-    const sectionEl = sectionRef.current;
-    const sentenceEls = sectionEl.querySelectorAll('.sentence');
-
-    // Height: we want enough scroll space for each sentence + some extra
-    // For N sentences, let's create a scrollable area ~ (N+1)*100vh
-    const totalSentences = sentences.length;
-    const pinDuration = (totalSentences + 1) * window.innerHeight;
-
-    // Set up ScrollTrigger for this section
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionEl,
-        start: "top top",
-        end: `+=${pinDuration}`,
-        pin: true,
-        scrub: true
-      }
-    });
-
-    // For each sentence, fade it in at different increments of the timeline
-    sentenceEls.forEach((el, i) => {
-      tl.fromTo(el, {opacity:0, y:50}, {opacity:1, y:0, duration:0.5}, i);
-      // Each sentence fades in at a different scroll position
-    });
-
-    return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach(st => st.kill());
-    };
-  }, [sentences]);
-
-  return (
-    <div ref={sectionRef} className="section-container">
-      <h2 className="section-title">{title}</h2>
-      <div className="sentences-wrapper">
-        {sentences.map((text, i) => (
-          <p className="sentence" key={i}>{text}</p>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-
-function calculateSectionHeights(rawContext) {
-  const sectionHeights = {};
-  let cumulativeHeight = 0;
-
-  Object.entries(rawContext).forEach(([title, sentences]) => {
-    const sectionHeight = (sentences.length + 1) * window.innerHeight; // Each sentence gets 1 viewport height
-    sectionHeights[title] = {
-      height: sectionHeight,
-      start: cumulativeHeight,
-    };
-    cumulativeHeight += sectionHeight;
+    useEffect(() => {
+    // Ensure refs.current is a proper array
+    if (!refs.current.length) {
+        refs.current = Array(Object.keys(rawContext).length)
+        .fill(null)
+        .map(() => React.createRef());
+    }
+    }, [rawContext]);
+  useGSAP(() => {
+    const tl = gsap.timeline();
+    setTl(tl);
+    const t2 = gsap.timeline();
+    setT2(t2);
   });
 
-  return { sectionHeights, totalHeight: cumulativeHeight };
-}
-export default function App() {
-  const { sectionHeights, totalHeight } = calculateSectionHeights(rawContext);
-  // Convert rawContext to an array of sections for easier rendering
-  // sections = [ [title, [sentences...]], [title, [sentences...]] ]
-
+  useGSAP(() => {
+  });
   return (
-    <div style={{margin:0, padding:0, height: `${totalHeight*2}px`}}>
-      {/* Text Sections */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 10 }}>
-        {Object.entries(rawContext).map(([title, sentences], idx) => (
-          <div
-            key={idx}
-            className="section-container"
-            style={{
-              position: 'absolute',
-              top: `${sectionHeights[title].start}px`, // Start position dynamically calculated
-              height: `${sectionHeights[title].height}px`, // Total height for the section
-            }}
-          >
-            <Section title={title} sentences={sentences} />
+      <>
+    <div
 
-          </div>
-        ))}
-      </div>
+        id="section-start"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100vw',
+        height: '100vh',
+        position: 'relative',
+        backgroundColor: '#f0f0f0', // Optional background color
+      }}
+    >
 
-      {/* 3D Background */}
-      <div style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', zIndex:1}}>
-        <Canvas>
-          <OrbitControls enableZoom={false} enablePan={false} />
-          <MainScene />
-        </Canvas>
-      </div>
+
+<div
+  style={{
+    position: 'absolute',
+    left: '10vw', // Adjust for desired left margin
+    top: '50%',
+    transform: 'translateY(-50%)', // Center vertically
+    textAlign: 'left',
+    zIndex: 50,
+  }}
+>
+  <div
+    style={{
+      fontSize: '4rem',
+      fontWeight: 'bold',
+    }}
+  >
+    <div>Identity-Based Branding:</div>
+    <div>Authentic or Exploitation?</div>
+  </div>
+  <div
+    style={{
+      textAlign: 'left',
+      fontSize: '2rem',
+      fontWeight: 'bold',
+      marginTop: '20px', // Adjust for spacing between title and author
+    }}
+  >
+    By Hunter
+  </div>
+</div>
+
     </div>
+
+      {/*<Section title={Object.keys(rawContext)[0]} sentences={rawContext[Object.keys(rawContext)[0]]}  /> */}
+
+
+
+<div className="container">
+  {Object.keys(rawContext).map((key, index) => {
+    let idName = `idName-${index}`;
+    if (index === 0) {
+      idName = "section-hope";
+    }
+
+    // Ensure refs array has enough entries
+    if (!refs.current[index]) refs.current[index] = React.createRef();
+
+    return (
+      <div key={idName} className="section">
+        <Section
+          title={key}
+          sentences={rawContext[key]}
+          idName={idName}
+          masterTimeline={tl2} 
+          index={index}
+        />
+        {index < Object.keys(rawContext).length - 1 && <div style={{ height: "20px" }}></div>}
+      </div>
+    );
+  })}
+</div>
+
+        <RotatingRingSection timeline={tl2} index={0} />
+      </>
   );
 }

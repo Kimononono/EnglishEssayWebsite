@@ -340,10 +340,11 @@ const { setCurrentAnimation } = useContext(AnimationContext);
 
     // For each sentence, fade it in at different increments of the timeline
     sentenceEls.forEach((sentence, i) => {
-      tl.fromTo(sentence.text, {opacity:0, y:50}, {opacity:1, y:0, duration:0.5}, i);
+      const animationId = sentence.getAttribute('data-animation-id');
+      tl.fromTo(sentence, {opacity:0, y:50}, {opacity:1, y:0, duration:0.5}, i);
       // Each sentence fades in at a different scroll position
       tl.call(() => {
-        setCurrentAnimation(sentence?.animationId);
+        setCurrentAnimation(animationId)
       }, null, i * 0.5 + 0.5);
     });
 
